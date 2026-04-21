@@ -316,7 +316,7 @@ async function analyzeShirt() {
 
     var r1 = await fetch(PROXY_URL, {
       method: "POST", headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 300, messages: [{ role: "user", content: contentParts }] })
+      body: JSON.stringify({ model: "claude-3-5-sonnet-20241022", max_tokens: 300, messages: [{ role: "user", content: contentParts }] })
     });
     var d1 = await r1.json();
     var result = JSON.parse(d1.content[0].text.replace(/```json|```/g, '').trim());
@@ -373,7 +373,7 @@ async function searchPrices(club, jaar, nameset) {
     var r2 = await fetch(PROXY_URL, {
       method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-3-5-sonnet-20241022",
         max_tokens: 600,
         tools: [{ type: "web_search_20250305", name: "web_search" }],
         messages: [{ role: "user", content: pricePrompt }]
