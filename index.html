@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tripletta Intake</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: #0a0f14; min-height: 100vh; padding: 20px 16px 40px; color: #e8eaf0; }
+.container { max-width: 480px; margin: 0 auto; }
+.header { display: flex; align-items: center; gap: 14px; margin-bottom: 24px; }
+.logo { width: 44px; height: 44px; border-radius: 10px; background: #d9ead3; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.logo svg { width: 24px; height: 24px; }
+.header-text { flex: 1; }
+.header-text h1 { font-size: 20px; font-weight: 600; color: #fff; letter-spacing: -0.3px; }
+.header-text p { font-size: 12px; color: #6b7280; margin-top: 1px; font-family: 'DM Mono', monospace; }
+.counter { display: inline-flex; align-items: center; gap: 6px; background: #1a3a22; border: 0.5px solid #2d6a4f; border-radius: 20px; padding: 4px 12px; font-family: 'DM Mono', monospace; font-size: 11px; color: #4ade80; }
+.section { background: #131920; border: 0.5px solid #1e2830; border-radius: 14px; padding: 16px; margin-bottom: 12px; }
+.section-label { font-size: 10px; font-weight: 600; letter-spacing: 1px; color: #4b5563; text-transform: uppercase; margin-bottom: 12px; font-family: 'DM Mono', monospace; }
+.photo-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.photo-slot { position: relative; border-radius: 9px; overflow: hidden; aspect-ratio: 1; background: #0d1520; border: 1px dashed #2a3540; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: all 0.2s; }
+.photo-slot:hover { border-color: #4ade80; background: #0d1a12; }
+.photo-slot.filled { border-style: solid; border-color: #2d6a4f; }
+.photo-slot.optional { border-color: #1e2830; }
+.photo-slot.optional:hover { border-color: #4ade80; }
+.photo-slot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.slot-icon { color: #374151; }
+.slot-label { font-size: 9px; color: #4b5563; font-family: 'DM Mono', monospace; margin-top: 6px; text-align: center; line-height: 1.4; }
+.optional-tag { font-size: 8px; color: #374151; font-family: 'DM Mono', monospace; margin-top: 2px; }
+.remove-btn { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; background: rgba(10,15,20,0.85); border: none; border-radius: 50%; color: #e8eaf0; font-size: 11px; cursor: pointer; display: none; align-items: center; justify-content: center; line-height: 1; z-index: 2; }
+.overlay-label { position: absolute; bottom: 0; left: 0; right: 0; background: rgba(10,15,20,0.75); font-size: 9px; color: #9ca3af; text-align: center; padding: 3px; font-family: 'DM Mono', monospace; display: none; }
+input[type=file] { display: none; }
+.field { margin-bottom: 10px; }
+.field label { display: block; font-size: 11px; color: #6b7280; margin-bottom: 5px; font-family: 'DM Mono', monospace; }
+.field input, .field select { width: 100%; padding: 9px 12px; background: #0d1520; border: 0.5px solid #1e2830; border-radius: 8px; font-size: 14px; color: #e8eaf0; font-family: 'DM Sans', sans-serif; transition: border-color 0.15s; }
+.field input:focus, .field select:focus { outline: none; border-color: #4ade80; }
+.field input::placeholder { color: #374151; }
+.field select option { background: #131920; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.ai-block { background: #0c1a10; border: 0.5px solid #1a3a22; border-radius: 10px; padding: 14px; margin-top: 4px; }
+.ai-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 600; color: #4ade80; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'DM Mono', monospace; margin-bottom: 12px; }
+.ai-dot { width: 6px; height: 6px; border-radius: 50%; background: #4ade80; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+.ai-field { margin-bottom: 8px; }
+.ai-field label { font-size: 10px; color: #4b5563; display: block; margin-bottom: 4px; font-family: 'DM Mono', monospace; }
+.ai-field input { width: 100%; padding: 8px 10px; background: #0a1510; border: 0.5px solid #1a3a22; border-radius: 7px; font-size: 13px; color: #d1fae5; font-family: 'DM Mono', monospace; }
+.ai-field input::placeholder { color: #2d4a35; }
+.ai-field input:focus { outline: none; border-color: #4ade80; }
+.ai-row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ai-row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+.price-block { background: #0f1520; border: 0.5px solid #1e2a40; border-radius: 10px; padding: 14px; margin-top: 4px; }
+.price-tag { display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 600; color: #60a5fa; text-transform: uppercase; letter-spacing: 0.8px; font-family: 'DM Mono', monospace; margin-bottom: 10px; }
+.price-dot { width: 6px; height: 6px; border-radius: 50%; background: #60a5fa; }
+.price-main { display: flex; align-items: baseline; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+.price-avg { font-size: 20px; font-weight: 600; color: #93c5fd; font-family: 'DM Mono', monospace; }
+.price-range-txt { font-size: 11px; color: #4b6080; font-family: 'DM Mono', monospace; }
+.price-sources { width: 100%; }
+.price-source-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 0.5px solid #1a2030; font-size: 11px; font-family: 'DM Mono', monospace; }
+.price-source-item:last-child { border-bottom: none; }
+.price-source-name { color: #4b6080; }
+.price-source-val { color: #93c5fd; font-weight: 500; }
+.price-note { font-size: 10px; color: #374151; font-family: 'DM Mono', monospace; margin-top: 8px; line-height: 1.5; }
+.price-loading { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #4b6080; font-family: 'DM Mono', monospace; padding: 8px 0; }
+.scan-btn { width: 100%; padding: 13px; background: #d9ead3; color: #0a1510; border: none; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+.scan-btn:hover:not(:disabled) { background: #c3e0bb; }
+.scan-btn:active:not(:disabled) { transform: scale(0.98); }
+.scan-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.copy-btn { width: 100%; padding: 13px; background: #1a3a22; color: #4ade80; border: 0.5px solid #2d6a4f; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+.copy-btn:hover { background: #1e4528; }
+.copy-btn:active { transform: scale(0.98); }
+.next-btn { width: 100%; padding: 13px; background: #0d1520; color: #6b7280; border: 0.5px solid #1e2830; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.15s; font-family: 'DM Sans', sans-serif; }
+.next-btn:hover { background: #131920; color: #9ca3af; border-color: #2a3540; }
+.next-btn:active { transform: scale(0.98); }
+.result-preview { background: #0d1520; border: 0.5px solid #1e2830; border-radius: 10px; padding: 12px; margin-bottom: 10px; overflow-x: auto; }
+.result-preview table { border-collapse: collapse; font-size: 11px; font-family: 'DM Mono', monospace; white-space: nowrap; }
+.result-preview th { background: #0a0f14; color: #4b5563; padding: 5px 10px; text-align: left; font-weight: 500; border-bottom: 0.5px solid #1e2830; }
+.result-preview td { padding: 6px 10px; color: #9ca3af; }
+.result-preview td.hi { color: #d1fae5; font-weight: 500; }
+.next-nr { font-family: 'DM Mono', monospace; font-size: 12px; color: #4b5563; text-align: right; margin-bottom: 8px; }
+.next-nr span { color: #4ade80; }
+.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #1a3a22; color: #4ade80; border: 0.5px solid #2d6a4f; padding: 10px 20px; border-radius: 20px; font-size: 13px; opacity: 0; transition: opacity 0.25s; pointer-events: none; z-index: 999; white-space: nowrap; font-family: 'DM Mono', monospace; }
+.toast.show { opacity: 1; }
+.spinner { width: 16px; height: 16px; border: 2px solid rgba(10,21,16,0.3); border-top-color: #0a1510; border-radius: 50%; animation: spin 0.7s linear infinite; }
+.spinner-blue { width: 13px; height: 13px; border: 2px solid #1e2a40; border-top-color: #60a5fa; border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.price-adjust { margin-top: 10px; padding-top: 10px; border-top: 0.5px solid #1a2030; }
+.price-adjust-label { font-size: 10px; color: #4b5563; font-family: 'DM Mono', monospace; margin-bottom: 8px; }
+.price-adjust-row { display: flex; align-items: center; gap: 8px; }
+.price-adjust-input { flex: 1; padding: 8px 10px; background: #0a0f1a; border: 0.5px solid #1e2a40; border-radius: 7px; font-size: 14px; color: #93c5fd; font-family: 'DM Mono', monospace; font-weight: 500; }
+.price-adjust-input:focus { outline: none; border-color: #60a5fa; }
+.price-set-btn { padding: 8px 14px; background: #1a2a40; color: #60a5fa; border: 0.5px solid #1e3a5f; border-radius: 7px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'DM Mono', monospace; white-space: nowrap; transition: all 0.15s; }
+.price-set-btn:hover { background: #1e3a5f; }
+.price-set-btn:active { transform: scale(0.97); }
+.price-chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.price-chip { padding: 4px 10px; background: #0f1520; border: 0.5px solid #1e2a40; border-radius: 20px; font-size: 10px; color: #4b6080; font-family: 'DM Mono', monospace; cursor: pointer; transition: all 0.15s; }
+.price-chip:hover { border-color: #60a5fa; color: #93c5fd; background: #0f1a2a; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#2d6a4f" stroke-width="2">
+        <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+        <line x1="3" y1="6" x2="21" y2="6"/>
+        <path d="M16 10a4 4 0 0 1-8 0"/>
+      </svg>
+    </div>
+    <div class="header-text">
+      <h1>Tripletta Intake</h1>
+      <p>shirt scanner &amp; invoer</p>
+    </div>
+    <div class="counter">shirt <span id="shirtCount">1</span></div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Foto's</div>
+    <div class="photo-grid">
+      <label class="photo-slot" id="slot0" for="file0">
+        <div id="placeholder0" style="display:flex;flex-direction:column;align-items:center;">
+          <svg class="slot-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+          <div class="slot-label">Voorkant</div>
+        </div>
+        <img id="img0" style="display:none;" alt="voorkant"/>
+        <div class="overlay-label" id="lbl0">Voorkant</div>
+        <button class="remove-btn" id="rm0" onclick="removePhoto(event,0)">&#x2715;</button>
+      </label>
+      <input type="file" id="file0" accept="image/*" capture="environment" onchange="addPhoto(0,this)"/>
+
+      <label class="photo-slot optional" id="slot1" for="file1">
+        <div id="placeholder1" style="display:flex;flex-direction:column;align-items:center;">
+          <svg class="slot-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg>
+          <div class="slot-label">Achterkant</div>
+          <div class="optional-tag">optioneel</div>
+        </div>
+        <img id="img1" style="display:none;" alt="achterkant"/>
+        <div class="overlay-label" id="lbl1">Achterkant</div>
+        <button class="remove-btn" id="rm1" onclick="removePhoto(event,1)">&#x2715;</button>
+      </label>
+      <input type="file" id="file1" accept="image/*" capture="environment" onchange="addPhoto(1,this)"/>
+
+      <label class="photo-slot optional" id="slot2" for="file2">
+        <div id="placeholder2" style="display:flex;flex-direction:column;align-items:center;">
+          <svg class="slot-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+          <div class="slot-label">Maatlabel</div>
+          <div class="optional-tag">optioneel</div>
+        </div>
+        <img id="img2" style="display:none;" alt="maat"/>
+        <div class="overlay-label" id="lbl2">Maatlabel</div>
+        <button class="remove-btn" id="rm2" onclick="removePhoto(event,2)">&#x2715;</button>
+      </label>
+      <input type="file" id="file2" accept="image/*" capture="environment" onchange="addPhoto(2,this)"/>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-label">Details</div>
+    <div class="row2">
+      <div class="field">
+        <label>Maat</label>
+        <select id="maat">
+          <option value="">-- kies / AI --</option>
+          <option>XS</option><option>S</option><option>M</option><option>L</option>
+          <option>XL</option><option>XXL</option><option>XXXL</option><option>2XL</option><option>YXL</option>
+          <option>Kids XS</option><option>Kids S</option><option>Kids M</option>
+          <option>Kids L</option><option>Kids XL</option><option>Kids XXL</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Matchworn</label>
+        <select id="matchworn">
+          <option value="">Nee</option>
+          <option value="matchworn">Matchworn</option>
+          <option value="spelersversie">Spelersversie</option>
+          <option value="BNWT">BNWT</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Inkoopprijs (euro)</label>
+        <input type="number" id="inkoop" placeholder="0" min="0" step="0.5"/>
+      </div>
+      <div class="field">
+        <label>Verkoopprijs (euro)</label>
+        <input type="number" id="verkoop" placeholder="0" min="0" step="0.5"/>
+      </div>
+    </div>
+    <div class="field">
+      <label>Notities</label>
+      <input type="text" id="notities" placeholder="optioneel..."/>
+    </div>
+  </div>
+
+  <button class="scan-btn" id="scanBtn" onclick="analyzeShirt()">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+    Shirt herkennen
+  </button>
+
+  <div id="aiSection" style="display:none;">
+    <div class="section">
+      <div class="section-label">AI Herkenning</div>
+      <div class="ai-block">
+        <div class="ai-tag"><div class="ai-dot"></div> Herkend — pas aan indien nodig</div>
+        <div class="ai-row2">
+          <div class="ai-field"><label>Club</label><input type="text" id="aiClub" oninput="buildRow()"/></div>
+          <div class="ai-field"><label>Land</label><input type="text" id="aiLand" oninput="buildRow()"/></div>
+        </div>
+        <div class="ai-row3">
+          <div class="ai-field"><label>Jaar</label><input type="text" id="aiJaar" oninput="buildRow()"/></div>
+          <div class="ai-field"><label>Nameset <span style="color:#2d4a35;font-size:9px;">(opt.)</span></label><input type="text" id="aiNameset" placeholder="bv. Messi 10" oninput="buildRow()"/></div>
+          <div class="ai-field"><label>Maat</label><input type="text" id="aiMaat" oninput="syncMaat()"/></div>
+        </div>
+      </div>
+
+      <div class="price-block" id="priceBlock" style="margin-top:10px;">
+        <div class="price-tag"><div class="price-dot"></div> Marktwaarde</div>
+        <div id="priceContent">
+          <div class="price-loading"><div class="spinner-blue"></div> Prijzen zoeken...</div>
+        </div>
+      </div>
+    </div>
+
+    <div id="rowSection" style="display:none;">
+      <div class="next-nr">Volgend nummer: <span id="nummerDisplay">T5627</span></div>
+      <div class="result-preview">
+        <table>
+          <tr><th>NUMMER</th><th>CLUB</th><th>LAND</th><th>MAAT</th><th>NAMESET</th><th>JAAR</th><th>INKOOP</th><th>VERKOOP</th><th>MATCHWORN</th><th>NOTITIES</th></tr>
+          <tr id="rowData"></tr>
+        </table>
+      </div>
+      <button class="copy-btn" id="copyBtn" onclick="copyRow()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        Kopieer rij voor Google Sheet
+      </button>
+      <button class="next-btn" onclick="nextShirt()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        Volgend shirt
+      </button>
+    </div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+var photos = [null, null, null];
+var mimes  = [null, null, null];
+var nextNummer = 'T5627';
+var shirtCount = 1;
+
+function addPhoto(idx, input) {
+  var file = input.files[0];
+  if (!file) return;
+  mimes[idx] = file.type;
+  var reader = new FileReader();
+  reader.onload = function(ev) {
+    photos[idx] = ev.target.result.split(',')[1];
+    document.getElementById('img' + idx).src = ev.target.result;
+    document.getElementById('img' + idx).style.display = 'block';
+    document.getElementById('placeholder' + idx).style.display = 'none';
+    document.getElementById('lbl' + idx).style.display = 'block';
+    document.getElementById('rm' + idx).style.display = 'flex';
+    document.getElementById('slot' + idx).classList.add('filled');
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePhoto(e, idx) {
+  e.preventDefault(); e.stopPropagation();
+  photos[idx] = null; mimes[idx] = null;
+  document.getElementById('img' + idx).style.display = 'none';
+  document.getElementById('img' + idx).src = '';
+  document.getElementById('placeholder' + idx).style.display = 'flex';
+  document.getElementById('lbl' + idx).style.display = 'none';
+  document.getElementById('rm' + idx).style.display = 'none';
+  document.getElementById('slot' + idx).classList.remove('filled');
+  document.getElementById('file' + idx).value = '';
+}
+
+['maat','inkoop','verkoop','notities','matchworn'].forEach(function(id) {
+  document.getElementById(id).addEventListener('input', buildRow);
+  document.getElementById(id).addEventListener('change', buildRow);
+});
+
+function syncMaat() {
+  var v = document.getElementById('aiMaat').value.trim();
+  if (v) {
+    var sel = document.getElementById('maat');
+    for (var i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value.toLowerCase() === v.toLowerCase()) { sel.selectedIndex = i; break; }
+    }
+  }
+  buildRow();
+}
+
+async function analyzeShirt() {
+  if (!photos[0]) { showToast('Upload minstens de voorkant!'); return; }
+  var btn = document.getElementById('scanBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> Bezig met herkennen...';
+
+  try {
+    var contentParts = [];
+    var labels = ['voorkant van het shirt', 'achterkant van het shirt — let op nameset', 'maatlabel'];
+    for (var i = 0; i < 3; i++) {
+      if (photos[i]) {
+        contentParts.push({ type: "image", source: { type: "base64", media_type: mimes[i], data: photos[i] } });
+        contentParts.push({ type: "text", text: "Foto " + (i+1) + ": " + labels[i] + "." });
+      }
+    }
+    contentParts.push({ type: "text", text: "Analyseer deze vintage voetbalshirt foto's en identificeer:\n1. Club of nationaal team (in het Nederlands: 'Barcelona', 'Nederland nationaal', 'AC Milan', etc.)\n2. Land (in het Nederlands: 'Spanje', 'Nederland', 'Italie', 'Engeland', 'Duitsland', 'Belgie', 'Frankrijk', 'Argentinie', 'Brazilie', etc.)\n3. Seizoen/jaar (bv. '1998/1999', '2002/2004', of gewoon '2006')\n4. Nameset op de achterkant (naam + nummer, bv. 'Messi 10'). Leeg als niet zichtbaar.\n5. Maatcode van het maatlabel als die foto er is. Leeg als niet zichtbaar.\n\nGeef ALLEEN valide JSON terug:\n{\"club\": \"...\", \"land\": \"...\", \"jaar\": \"...\", \"nameset\": \"\", \"maat\": \"\"}" });
+
+    var r1 = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 300, messages: [{ role: "user", content: contentParts }] })
+    });
+    var d1 = await r1.json();
+    var result = JSON.parse(d1.content[0].text.replace(/```json|```/g, '').trim());
+
+    document.getElementById('aiClub').value    = result.club    || '';
+    document.getElementById('aiLand').value    = result.land    || '';
+    document.getElementById('aiJaar').value    = result.jaar    || '';
+    document.getElementById('aiNameset').value = result.nameset || '';
+    document.getElementById('aiMaat').value    = result.maat    || '';
+
+    if (result.maat) {
+      var sel = document.getElementById('maat');
+      for (var j = 0; j < sel.options.length; j++) {
+        if (sel.options[j].value.toLowerCase() === result.maat.toLowerCase()) { sel.selectedIndex = j; break; }
+      }
+    }
+
+    document.getElementById('aiSection').style.display = 'block';
+    buildRow();
+    showToast('Shirt herkend! Prijzen zoeken...');
+
+    searchPrices(result.club, result.jaar, result.nameset);
+
+  } catch(err) {
+    document.getElementById('aiClub').value = '';
+    document.getElementById('aiLand').value = '';
+    document.getElementById('aiJaar').value = '';
+    document.getElementById('aiNameset').value = '';
+    document.getElementById('aiMaat').value = '';
+    document.getElementById('aiSection').style.display = 'block';
+    buildRow();
+    document.getElementById('priceContent').innerHTML = '<div class="price-note">Herkenning mislukt — vul handmatig in</div>';
+    showToast('Herkenning mislukt — vul handmatig in');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Opnieuw herkennen';
+}
+
+async function searchPrices(club, jaar, nameset) {
+  document.getElementById('priceContent').innerHTML = '<div class="price-loading"><div class="spinner-blue"></div> Prijzen zoeken op vintage sites...</div>';
+
+  try {
+    var shirtDesc = [club, jaar, nameset].filter(Boolean).join(' ') + ' voetbalshirt kopen';
+    var pricePrompt = "Search for the current market price of this vintage football shirt using this search query: \"" + shirtDesc + "\".\n\n" +
+      "Look at whatever results come up — retailer sites, eBay, Vinted, etc. — and collect actual prices from listings you find.\n\n" +
+      "Return a JSON object with:\n" +
+      "- sources: array of up to 5 objects with { site: string, price: string, currency: string } for actual listings found\n" +
+      "- avg_eur: estimated average market price in EUR as a number (convert if needed)\n" +
+      "- range: string like '€40 - €80'\n" +
+      "- note: short observation in Dutch (max 1 sentence, e.g. 'Zeldzaam shirt, hoge vraagprijs.' or 'Veel aanbod, prijzen variëren sterk.')\n\n" +
+      "Respond ONLY with valid JSON, nothing else.";
+
+    var r2 = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 600,
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
+        messages: [{ role: "user", content: pricePrompt }]
+      })
+    });
+
+    var d2 = await r2.json();
+    var priceText = '';
+    for (var i = 0; i < d2.content.length; i++) {
+      if (d2.content[i].type === 'text') { priceText += d2.content[i].text; }
+    }
+    priceText = priceText.replace(/```json|```/g, '').trim();
+
+    var jsonMatch = priceText.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON');
+    var prices = JSON.parse(jsonMatch[0]);
+
+    var html = '';
+    if (prices.avg_eur) {
+      html += '<div class="price-main">';
+      html += '<span class="price-avg">~€' + Math.round(prices.avg_eur) + '</span>';
+      if (prices.range) html += '<span class="price-range-txt">' + prices.range + '</span>';
+      html += '</div>';
+    }
+    if (prices.sources && prices.sources.length > 0) {
+      html += '<div class="price-sources">';
+      prices.sources.forEach(function(s) {
+        html += '<div class="price-source-item"><span class="price-source-name">' + s.site + '</span><span class="price-source-val">' + s.price + '</span></div>';
+      });
+      html += '</div>';
+    }
+    if (prices.note) {
+      html += '<div class="price-note">' + prices.note + '</div>';
+    }
+    if (!html) throw new Error('Empty');
+
+    document.getElementById('priceContent').innerHTML = html;
+    showPriceAdjust(prices.avg_eur ? Math.round(prices.avg_eur) : null);
+
+  } catch(err) {
+    document.getElementById('priceContent').innerHTML = '<div class="price-note">Kon geen prijzen vinden voor dit shirt. Zoek handmatig op classicfootballshirts.co.uk</div>';
+  }
+}
+
+function buildRow() {
+  var club    = document.getElementById('aiClub').value;
+  var land    = document.getElementById('aiLand').value;
+  var jaar    = document.getElementById('aiJaar').value;
+  var nameset = document.getElementById('aiNameset').value;
+  var maat    = document.getElementById('maat').value;
+  var inkoop  = document.getElementById('inkoop').value;
+  var verkoop = document.getElementById('verkoop').value;
+  var notities= document.getElementById('notities').value;
+  var mw      = document.getElementById('matchworn').value;
+
+  document.getElementById('rowData').innerHTML =
+    '<td class="hi">' + nextNummer + '</td>' +
+    '<td class="hi">' + (club||'—') + '</td>' +
+    '<td>' + (land||'—') + '</td>' +
+    '<td>' + (maat||'—') + '</td>' +
+    '<td>' + (nameset||'') + '</td>' +
+    '<td>' + (jaar||'—') + '</td>' +
+    '<td>' + (inkoop ? parseFloat(inkoop).toFixed(2) : '—') + '</td>' +
+    '<td>' + (verkoop ? parseFloat(verkoop).toFixed(2) : '—') + '</td>' +
+    '<td>' + (mw||'') + '</td>' +
+    '<td>' + (notities||'') + '</td>';
+
+  document.getElementById('rowSection').style.display = 'block';
+}
+
+
+function applyQuickPrice() {
+  var v = document.getElementById('quickVerkoop').value;
+  if (!v) return;
+  document.getElementById('verkoop').value = parseFloat(v).toFixed(2);
+  buildRow();
+  showToast('Verkoopprijs bijgewerkt naar €' + parseFloat(v).toFixed(2));
+}
+
+function setQuickChip(val) {
+  document.getElementById('quickVerkoop').value = val;
+  applyQuickPrice();
+}
+
+function showPriceAdjust(avg) {
+  document.getElementById('priceAdjust').style.display = 'block';
+  if (avg) {
+    document.getElementById('quickVerkoop').value = avg;
+    var chips = [
+      Math.round(avg * 0.8 / 5) * 5,
+      Math.round(avg * 0.9 / 5) * 5,
+      avg,
+      Math.round(avg * 1.1 / 5) * 5,
+      Math.round(avg * 1.2 / 5) * 5
+    ];
+    var unique = chips.filter(function(v,i,a){ return a.indexOf(v)===i && v > 0; });
+    var chipsHtml = unique.map(function(v) {
+      return '<div class="price-chip" onclick="setQuickChip(' + v + ')">€' + v + '</div>';
+    }).join('');
+    document.getElementById('priceChips').innerHTML = chipsHtml;
+  }
+}
+
+function copyRow() {
+  var cols = [
+    'ONWAAR', nextNummer,
+    document.getElementById('aiClub').value,
+    document.getElementById('aiLand').value,
+    document.getElementById('maat').value,
+    document.getElementById('aiNameset').value,
+    document.getElementById('aiJaar').value,
+    document.getElementById('inkoop').value || '',
+    document.getElementById('verkoop').value || '',
+    '', document.getElementById('matchworn').value,
+    document.getElementById('notities').value
+  ];
+  navigator.clipboard.writeText(cols.join('\t')).then(function() {
+    showToast('Gekopieerd! Plak onderaan in Voorraad');
+    document.getElementById('copyBtn').innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg> Gekopieerd!';
+  }).catch(function() { showToast('Kopieer handmatig uit de tabel'); });
+}
+
+function nextShirt() {
+  var n = parseInt(nextNummer.replace('T',''));
+  nextNummer = 'T' + (n + 1);
+  shirtCount++;
+  document.getElementById('nummerDisplay').textContent = nextNummer;
+  document.getElementById('shirtCount').textContent = shirtCount;
+  for (var i = 0; i < 3; i++) removePhoto({ preventDefault:function(){}, stopPropagation:function(){} }, i);
+  ['aiClub','aiLand','aiJaar','aiNameset','aiMaat'].forEach(function(id) { document.getElementById(id).value = ''; });
+  document.getElementById('maat').selectedIndex = 0;
+  document.getElementById('matchworn').selectedIndex = 0;
+  document.getElementById('inkoop').value = '';
+  document.getElementById('verkoop').value = '';
+  document.getElementById('notities').value = '';
+  document.getElementById('aiSection').style.display = 'none';
+  document.getElementById('rowSection').style.display = 'none';
+  document.getElementById('priceContent').innerHTML = '<div class="price-loading"><div class="spinner-blue"></div> Prijzen zoeken...</div>';
+  document.getElementById('priceAdjust').style.display = 'none';
+  document.getElementById('priceChips').innerHTML = '';
+  document.getElementById('copyBtn').innerHTML = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Kopieer rij voor Google Sheet';
+  document.getElementById('scanBtn').innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Shirt herkennen';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+  showToast('Klaar voor shirt ' + shirtCount + ' — ' + nextNummer);
+}
+
+function showToast(msg) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3000);
+}
+</script>
+</body>
+</html>
