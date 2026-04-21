@@ -246,6 +246,7 @@ input[type=file] { display: none; }
 <div class="toast" id="toast"></div>
 
 <script>
+var ANTHROPIC_KEY = "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";
 var photos = [null, null, null];
 var mimes  = [null, null, null];
 var nextNummer = 'T5627';
@@ -314,7 +315,7 @@ async function analyzeShirt() {
     contentParts.push({ type: "text", text: "Analyseer deze vintage voetbalshirt foto's en identificeer:\n1. Club of nationaal team (in het Nederlands: 'Barcelona', 'Nederland nationaal', 'AC Milan', etc.)\n2. Land (in het Nederlands: 'Spanje', 'Nederland', 'Italie', 'Engeland', 'Duitsland', 'Belgie', 'Frankrijk', 'Argentinie', 'Brazilie', etc.)\n3. Seizoen/jaar (bv. '1998/1999', '2002/2004', of gewoon '2006')\n4. Nameset op de achterkant (naam + nummer, bv. 'Messi 10'). Leeg als niet zichtbaar.\n5. Maatcode van het maatlabel als die foto er is. Leeg als niet zichtbaar.\n\nGeef ALLEEN valide JSON terug:\n{\"club\": \"...\", \"land\": \"...\", \"jaar\": \"...\", \"nameset\": \"\", \"maat\": \"\"}" });
 
     var r1 = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST", headers: { "Content-Type": "application/json" },
+      method: "POST", headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 300, messages: [{ role: "user", content: contentParts }] })
     });
     var d1 = await r1.json();
@@ -370,7 +371,7 @@ async function searchPrices(club, jaar, nameset) {
       "Respond ONLY with valid JSON, nothing else.";
 
     var r2 = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST", headers: { "Content-Type": "application/json" },
+      method: "POST", headers: { "Content-Type": "application/json", "x-api-key": ANTHROPIC_KEY, "anthropic-version": "2023-06-01" },
       body: JSON.stringify({
         model: "claude-sonnet-4-20250514",
         max_tokens: 600,
