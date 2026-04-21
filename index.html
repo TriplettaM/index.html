@@ -220,6 +220,14 @@ input[type=file] { display: none; }
         <div id="priceContent">
           <div class="price-loading"><div class="spinner-blue"></div> Prijzen zoeken...</div>
         </div>
+        <div class="price-adjust" id="priceAdjust" style="display:none;">
+          <div class="price-adjust-label">Pas verkoopprijs aan op basis van marktwaarde</div>
+          <div class="price-adjust-row">
+            <input type="number" class="price-adjust-input" id="quickVerkoop" placeholder="€ ..." min="0" step="5" oninput="applyQuickPrice()"/>
+            <button class="price-set-btn" onclick="applyQuickPrice()">Toepassen</button>
+          </div>
+          <div class="price-chips" id="priceChips"></div>
+        </div>
       </div>
     </div>
 
